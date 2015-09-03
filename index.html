@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="css/style.css">
+		<title>GuitarMax - Lego House</title>
+	</head>
+	<body>
+		<a href="#"><div id="title-bar">
+			<strong>Photograph</strong> <small> &bull; Ed Sheeran </small>
+		</div></a>
+		<div id="guitar-canvas">
+			<canvas id="back-canvas"></canvas></canvas>
+			<canvas id="front-canvas"></canvas></canvas>
+		</div>
+		<div id="playback-control">
+			<div id="left-control">
+				speed: <a href="#" data-spf="0.1"><div class="control-btn">1/10x</div></a><a href="#" data-spf="0.2"><div class="control-btn">1/5x</div></a><a href="#" data-spf="0.5"><div class="control-btn">1/2x</div></a><a href="#" data-spf="1"><div class="control-btn control-btn-selected">normal</div></a><a href="#" data-spf="2"><div class="control-btn">2x</div></a>
+			</div>
+			<div id="right-control">
+				view: <a href="#"><div class="control-btn control-btn-selected">default</div></a><a href="#"><div class="control-btn">full</div></a><a href="#"><div class="control-btn">split</div></a><a href="#"><div class="control-btn">tab</div></a>
+			</div>
+			<div id="mid-control">
+				<a href="#" class="pause"><div class="control-btn pause-set"><strong>pause</strong></div></a><a href="#" class="loop"><div class="control-btn pause-set">loop</div></a>
+				<a href="#" class="-step"><div class="control-btn play-set">-step</div></a><a href="#" class="play"><div class="control-btn play-set"><strong>play</strong></div></a><a href="#" class="+step"><div class="control-btn play-set">+step</div></a>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/audiosynth.js"></script>
+	<script type="text/javascript" src="js/script.js"></script>
+	<script>
+		drawGuitarPic();
+		playTab(5,
+"--------------------------------------------------------------------------------------------------------------------------------#"+
+"----3-2-3-------------3-2-3------------3-2-3------------3-2-3------------3-2-3-------------3-2-3------------3-2-3----------*----#"+
+"-----------2-----------------2----------------2----------------2----------------2-----------------2----------------2------------#"+
+"--------------5--4--*-----------5--4-*-----------5--4-*-----------5--4-*-----------5--4--*-----------5--4-*-----------5--4-*----#"+
+"-5---------*--------5--------*-------2----------------2-------------------------------------------------------------------------#"+
+"-----------------------------------------------------------------------5--------*--------5-----------*----3-----------*----3----");
+
+	</script>
+</html>

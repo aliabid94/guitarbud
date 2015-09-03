@@ -1,0 +1,91 @@
+@import url("http://fonts.googleapis.com/css?family=Josefin+Sans");
+
+html, body {
+	margin:0;
+	padding:0;
+}
+
+a {
+	 text-decoration: none;
+	 color: #dddddd;
+}
+
+
+#title-bar, #playback-control {
+	font-family: 'Josefin Sans';
+	color: #dddddd;	
+	position: relative;
+	z-index: 2;
+}
+
+#title-bar {
+	background-color: #2b3e50;
+	width: 100%;
+	height:10%;
+	text-align: center;
+	font-size: 6vh;
+	height:8%;
+}
+
+#title-bar:hover {
+	color: #eeeeee;	
+	text-shadow: 0 0 3px white;
+}
+
+#guitar-canvas {
+	height:72%;
+	width:100%;
+	position: relative;
+}
+
+#back-canvas, #front-canvas {
+	position: absolute;
+	left: 0; top: 0;
+}
+
+#back-canvas {
+	z-index: 0;
+}
+
+#front-canvas {
+	z-index: 1;
+}
+
+
+#playback-control {
+	height:4%;
+	width: 100%;
+	font-size: 3.3vh; 
+	background-color: #2b3e50;
+	text-align: center;
+}
+
+.control-btn {
+	height: 100%;
+	display: inline-block;
+	margin: 0px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.control-btn-selected {
+	background-color: #3C5165;	
+}
+
+.control-btn:hover {
+	background-color: #3C5165;
+}
+
+#left-control {
+	float: left;
+}
+
+
+#right-control {
+	float: right;
+}
+
+
+body {
+	background-color: #4e5d6c;
+}
