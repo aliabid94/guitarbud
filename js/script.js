@@ -303,8 +303,8 @@ function drawHand(fingerpos, fingerpos2, ms, color)
 	if (ms > ctime)
 	{
 		var ms2 = ms - ctime;
-		var f1f = ms2 / stime;
-		var f2f = 1 - f1f;
+		var f2f = ms2 / stime;
+		var f1f = 1 - f2f;
 		var fxys3 = [0,0,0,0,0]
 		for (var i=0; i<5; i++)
 		{
