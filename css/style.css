@@ -33,7 +33,7 @@ a {
 }
 
 #guitar-canvas {
-	height:72%;
+	height:55%;
 	width:100%;
 	position: relative;
 }
@@ -53,9 +53,9 @@ a {
 
 
 #playback-control {
-	height:4%;
+	height:4.5%;
 	width: 100%;
-	font-size: 3.3vh; 
+	font-size: 3.8vh; 
 	background-color: #2b3e50;
 	text-align: center;
 }
@@ -83,6 +83,9 @@ a {
 
 #right-control {
 	float: right;
+}
+
+#info {
 }
 
 
