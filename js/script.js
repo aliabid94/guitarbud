@@ -17,6 +17,8 @@ var lastkey = [0,0,0,0,0,0];
 var alllastkey;
 var lastpluck = ['*',0,'*',0,'*',0,'*',0,'*',0,'*',0];
 var lastfinger = ["*","*","*","*","*"];
+var delaypluck = [0,0,0,0,0,0];
+var subs = []
 var alllastfinger;
 var progress = 0;
 var lastpoint=0;
@@ -28,14 +30,16 @@ var mousedown = false;
 var mouseclick = false;
 var looping=false;
 var acoustic;
-var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+var notes = ["C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"];
 var tuning = [["E", 4],["B",3],["G",3],["D",3],["A",2],["E",2]];
 var stringsnom = "zyxwvu";
-var fingerrels = [[-6,-10],[-20,-16],[-32,-13],[-40,2],[3,-35]];
+var fingerrels = [[-6,6],[-20,3],[-32,6],[-40,21],[3,-16]];
+var fxys;
 var fingernames = "1234T"
+var capo;
 
 $(window).resize(function(){
-	drawGuitarPic();
+	drawGuitarPic(capo);
 });
 
 $("#left-control a").click(function () {
@@ -74,6 +78,7 @@ $("#mid-control .pause").click(pausefunc);
 
 function pausefunc() {
 	speed = 0;
+	progress = Math.floor(progress/1000) *1000;
 	$("#mid-control .pause-set").hide();
 	$("#mid-control .play-set").show();	
 }
@@ -121,8 +126,6 @@ $(document).ready(function() {
 			mouseclick = true;
 		}
 	});
-	acoustic = Synth.createInstrument('acoustic');
-	Synth.setVolume(0.20);
 });
 
 function getMousePos(canvas, evt) {
@@ -133,14 +136,15 @@ function getMousePos(canvas, evt) {
 	};
 }
 
-function drawGuitarPic()
+function drawGuitarPic(capoloc)
 {
+	capo = capoloc;
 	fitToContainer(bcanvas);
 	fitToContainer(fcanvas);
 	var guitarLength = 580;
 	scale = bcanvas.width / guitarLength;
 	bcontext.clearRect(0, 0, bcanvas.width, bcanvas.height);
-	yoff = bcanvas.height/2/scale - 25/scale;
+	yoff = bcanvas.height/2/scale - 30;
 	bcontext.scale(scale, scale);
 	bcontext.translate(xoff, yoff);
 	fcontext.scale(scale, scale);
@@ -150,15 +154,19 @@ function drawGuitarPic()
 
 function playTab2(speed, newTab)
 {
+	dfs = speed;
+	fxys = fingerrels.slice();
 	var ptab1 = newTab.split("#");
 	tablen = ptab1[0].length;
-	tab = makeArray(tablen, 6);
+	tab = makeArray(tablen, 7);
+	subs = new Array(tablen);
 	for (i=0; i<ptab1.length; i++)
 	{
 		istr = ptab1[i];
 		lnum = istr.charAt(0);
 		if (lnum == "T") lnum = 5;
 		if (lnum == "S") lnum = 6;
+		if (lnum == "l") lnum = 7;
 		lnum = lnum - 1;
 		for (j=2; j<istr.length; j++)
 		{
@@ -169,6 +177,7 @@ function playTab2(speed, newTab)
 			}
 		}
 	}
+	if (getNextAfter(-1, tab[6]) != null) createSubtitles();
 	createAllLocs();
 	window.requestAnimationFrame(play2);
 }
@@ -198,13 +207,70 @@ function play2(timestamp)
 		var pluckvals = tab[5][nextPlayLoc];
 		if (pluckvals != null) 
 		{
-			var pluckval = stringsnom.indexOf(pluckvals);
-			pluck(pluckval, curpoint);
+			var patt1 = /^([zyxwvu]+)$/;
+			var patt2 = /^([zyxwvu])>([zyxwvu])$/;
+			if (patt1.test(pluckvals)){
+				for (i=0; i<pluckvals.length; i++)
+				{
+					var stg = pluckvals.charAt(i);
+					var pluckval = stringsnom.indexOf(stg);
+					pluck(pluckval, curpoint);
+				}
+			}
+			else if (patt2.test(pluckvals)){
+				var matches = pluckvals.match(patt2);
+				var fromstg = matches[1];
+				var tostg = matches[2];
+				var fromval = stringsnom.indexOf(fromstg);
+				var toval = stringsnom.indexOf(tostg);
+				var move = (fromval > toval) ? -1 : 1;
+				var strumtime = 0;
+				pluck(fromval, curpoint);
+				for (i=fromval+move; i!=toval+move; i+=move)
+				{
+					strumtime += 20;
+					delaypluck[i] = curpoint + strumtime;
+				}
+			}
+
 		} 
+	}
+	for (i=0; i<6; i++) {
+		if (delaypluck[i] > 0 && delaypluck[i] < curpoint)
+		{
+			pluck(i, curpoint);
+			delaypluck[i] = 0;
+		}
 	}
 	playLoc = nextPlayLoc;
 	drawPlay2(curpoint, progress, playLoc);
 	window.requestAnimationFrame(play2);
+}
+
+function createSubtitles()
+{
+	var index = -1;
+	array = tab[6];
+	var curstart = getNextAfter(index, array);
+	var toaddnext = ""
+	var index = -1;
+	while(getNextAfter(index, array) != array.length){
+		index = getNextAfter(index, array);
+		if (subs[curstart] == null) subs[curstart] = "";	
+		var cursub = array[index];
+		var cut = cursub.indexOf("/");
+		if (cut != -1)
+		{
+			subs[curstart] += cursub.substring(0,cut);
+			var nextindex = getNextAfter(index, array);
+			curstart = Math.floor((nextindex*cut + index*(cursub.length-cut))/cursub.length);
+			subs[curstart] = cursub.substring(cut+1);
+		}
+		else
+		{
+			subs[curstart] += cursub;
+		}
+	}
 }
 
 function createAllLocs()
@@ -214,7 +280,7 @@ function createAllLocs()
 	alllastfinger = makeArray(5, tlen);
 
 
-	var ilastkey = [0,0,0,0,0,0];
+	var ilastkey = [capo,capo,capo,capo,capo,capo];
 	var ilastfinger = ["*","*","*","*","*"];
 	for (playLoc = 0; playLoc <= tlen; playLoc++)
 	{
@@ -228,16 +294,24 @@ function createAllLocs()
 				{
 					fs = getfns(lf);
 					s = fs[1];
-					ilastkey[s] = 0;
-					for (k=0; k<5; k++)
+					s2 = fs[2];
+					for (si = s; si >= s2; si--)
 					{
-						lf2 = ilastfinger[k];
-						if (lf2 != "*")
+						ilastkey[si] = capo;
+						for (k=0; k<5; k++)
 						{
-							fs2 = getfns(lf2);
-							f2 = fs2[0];
-							s2 = fs2[1];
-							if (s2 == s && k != i && ilastkey[s] < f2) ilastkey[s] = f2;
+							lfb = ilastfinger[k];
+							if (lfb != "*")
+							{
+								fsb = getfns(lfb);
+								fb = fsb[0];
+								sb = fsb[1];
+								sb2 = fsb[2];
+								for (sib = sb; sib >= sb2; sib--)
+								{
+									if (sib == si && k != i && ilastkey[si] < fb) ilastkey[si] = fb;
+								}
+							}
 						}
 					}
 				}
@@ -247,8 +321,11 @@ function createAllLocs()
 					fs = getfns(letter);
 					f = fs[0];
 					s = fs[1];
-
-					if (ilastkey[s] < f) ilastkey[s] = f;
+					s2 = fs[2];
+					for (si = s; si >= s2; si--)
+					{
+						if (ilastkey[si] < f) ilastkey[si] = f;
+					}
 				}
 			}
 		}
@@ -271,8 +348,13 @@ function pluck(i, time)
 	var fnote = notes[fnotenum];
 	var offset = parseInt(bnotenum) + parseInt(j);
 	var foct = boct + Math.floor(offset / 12);
-	acoustic.play(fnote, foct, 1);
-
+	var note = fnote + foct;
+	var noteaud = document.getElementById(note);
+	if (noteaud != null)
+	{
+		noteaud.currentTime = 0.1;
+		noteaud.play();
+	}
 }
 
 function drawPlay2(time, progress, playLoc)
@@ -293,11 +375,28 @@ function drawPlay2(time, progress, playLoc)
 	drawPlayProgress(fcontext, playLoc);
 }
 
+var ihand = false;
 function drawHand(fingerpos, fingerpos2, ms, color)
 {
-	var fxys = getFingerXY(fingerpos);
-	var fxys2 = getFingerXY(fingerpos2);
-	var stime = 250;
+	ihand = false;
+	var ind;
+	for (i=0; playLoc >= i && arrayIsAll(fingerpos,"*",playLoc+" ;;"); i++) 
+	{
+		ihand = true;
+		ind = i;
+		fingerpos=alllastfinger[playLoc-i];
+	}
+	if (ind == playLoc)
+	{
+		fxys = getFingerXY(["1y","*","*","*","*"]);
+	}
+	else
+	{
+		fxys = getFingerXY(fingerpos);
+	}
+	var fxys2 = fxys;
+	if (!arrayIsAll(fingerpos2,"*")) fxys2 = getFingerXY(fingerpos2);
+	var stime = 300;
 	var ctime = 1000 - stime;
 	var alp = [0,0,0,0,0];
 	if (ms > ctime)
@@ -313,19 +412,72 @@ function drawHand(fingerpos, fingerpos2, ms, color)
 		}
 		fxys = fxys3;
 	}
-	for (var i=0; i<5; i++)
+	for (var i=4; i>=0; i--)
 	{
-		var ang = (i == 4) ? -5*Math.PI / 6 : -Math.PI / 6;
 		if (alp[i] == 0) alp[i] = (fingerpos[i] == "*") ? 0.35 : 1;
-		drawFinger2(fcontext, color, fingernames.charAt(i), 5, 7, fxys[i][0], fxys[i][1], ang, alp[i]);
+		if (ihand) alp[i] = 0.35;
+	}
+	var baseloc = 0;
+	var fingdist = 10;
+	for (var i=3; i>=0; i--) { baseloc += fxys[i][0]; }
+	baseloc /= 4;
+	var fw = 3.5;
+	baseloc += fingdist;
+	for (var i=4; i>=0; i--)
+	{
+		fcontext.beginPath();
+		var curx = baseloc+15-fingdist*i;
+		var cury = 30;
+		fw=3;
+		if (i == 4)
+		{
+ 			curx = fxys[i][0];
+			cury = -19;
+			fw=4;
+		}
+		var finx = fxys[i][0];
+		var finy = fxys[i][1];
+		var knuckoff = ((finx > curx && i < 2) || (finx < curx && i >= 2)) ? 0.8 : 0.2;
+		var midx = curx*.5 + finx*0.5;
+		var midy = cury*knuckoff + finy*(1-knuckoff);
+		var angle = getangle(curx, cury, midx, midy);
+		var angle2 = getangle(midx, midy, finx, finy);
+		var angle3 = getangle(curx, cury, finx, finy);
+		var cang = fw*Math.cos(angle);
+		var sang = fw*Math.sin(angle);
+		var cang2 = fw*Math.cos(angle2);
+		var sang2 = fw*Math.sin(angle2);
+		var cang3 = fw*Math.cos(angle3);
+		var sang3 = fw*Math.sin(angle3);
+		if (i == 4)
+		{
+ 			cang = cang2 = cang3;
+ 			sang = sang2 = sang3;
+		}
+		fcontext.moveTo(curx+sang,cury-cang);
+		fcontext.arcTo(midx+0.5*sang+0.5*sang2,midy-0.5*cang-0.5*cang2,finx+sang2,finy-cang2,16);
+		fcontext.lineTo(finx+sang2,finy-cang2);
+		fcontext.arcTo(finx+300*cang2,finy+300*sang2,finx-sang2,finy+cang2,fw);
+		fcontext.lineTo(finx-sang2,finy+cang2);
+		fcontext.arcTo(midx-0.5*sang2-0.5*sang,midy+0.5*cang2+0.5*cang,curx-sang,cury+cang,16);
+		fcontext.lineTo(curx-sang,cury+cang);
+//		fcontext.lineTo(finx, finy);
+//		fcontext.lineWidth = 2;
+		fcontext.globalAlpha = alp[i];
+		fcontext.strokeStyle = 'black';
+	    fcontext.stroke();		
+	    fcontext.fillStyle = color;
+	    fcontext.fill();
+		fcontext.globalAlpha = 1;
 	}
 }
 
 function getFingerXY(fingerpos){
 	var fixedfing = [0,0,0,0,0];
 	var corrdist = [10,10,10,10,10]
+	var pushover = [1,1,1,1,1]
 	var anchors = 0;
-	for (var i=0; i<5; i++)
+	for (var i=4; i>-1; i--)
 	{
 		if (fingerpos[i] != "*")
 		{
@@ -335,7 +487,14 @@ function getFingerXY(fingerpos){
 			s = fs[1];
 			var fsp = getFSPoint(f, s);
 			var fsp2 = getFSPoint(f-1, s);
-			fsp15 = (fsp[0]*4 + fsp2[0])/5;
+			if (i != 4)
+			{
+				pfs = getfns(fingerpos[i+1]);
+				pf = pfs[0];
+				ps = pfs[1];
+				if (f == pf && s == ps + 1) pushover[i] = pushover[i]+1;
+			}
+			fsp15 = (fsp[0]*(5-pushover[i]) + fsp2[0]*(pushover[i]))/5;
 			fixedfing[i] = [fsp15, fsp[1]];
 		}
 	}
@@ -384,7 +543,7 @@ function drawFinger2(ctx, color, finger, radius, fingerlen, xoff, yoff, angle, a
     ctx.restore();
 	ctx.font =  "bold 8px Courier";
 	ctx.fillStyle = 'black';
-	ctx.fillText(finger, xoff-2, yoff+3);
+//	ctx.fillText(finger, xoff-2, yoff+3);
 }
 
 
@@ -401,13 +560,11 @@ function drawPlayProgress(ctx, playLoc) {
 		 	ctx.lineWidth = 0;
 	  		ctx.strokeStyle = 'black';
 	  		ctx.stroke();		
-		}
+	}
 	}
 	drawRect(ctx, 8, 16, 100+(playLoc * unitdist)-4, 43, '#black', 1, '#AAB2B9')
 	if (smx > 100 && smx < 500 && smy > 45 && smy < 45+12)
 	{
-//		ctx.fillStyle = 'black';
-//		ctx.fillText(smx + " & " + smy, 180, 30);
 		ctx.globalAlpha = 0.5;
 		drawRect(ctx, 8, 16, smx-4, 43, '#black', 1, '#80E6FF');
 		newunits = Math.floor((smx - 100) / unitdist);
@@ -421,11 +578,20 @@ function drawPlayProgress(ctx, playLoc) {
 			lastkey = alllastkey[newunits];
 		}
 	}
-	else
+	if (getPrevBefore(playLoc, subs) != -1)
 	{
-//		ctx.fillStyle = 'black';
-//		ctx.fillText(smx + " & " + smy, 180, 20);		
-	}
+		var sloc = getPrevBefore(playLoc, subs);
+		var sloc2 = getNextAfter(playLoc, subs);
+		var sub = subs[sloc];
+		var diffdist = Math.min(Math.abs(progress-(sloc+1)*1000), Math.abs(progress-(sloc2+1)*1000));
+		if (diffdist < 1000) ctx.globalAlpha = diffdist / 1000;
+		ctx.font =  "bold 14px Josefin Sans";
+		ctx.fillStyle = "white";
+		ctx.textAlign = 'center';
+		ctx.fillText(sub,290,90);	
+		ctx.textAlign = 'left';
+		ctx.globalAlpha = 1;
+	} 
 }
 
 function getFSPoint(fret, string) {
@@ -437,15 +603,30 @@ function getFSPoint(fret, string) {
 
 function getfns(seq)
 {
-	lfret = seq.charAt(0);
+	lfret = parseInt(seq.charAt(0)) + capo;
 	lstrs = seq.charAt(1);
-	lstr = stringsnom.indexOf(lstrs);
-	return	[lfret, lstr];
+	var lstrf = lstr = stringsnom.indexOf(lstrs);
+	var patt1 = /[0-9]+[uvwxyz][|][uvwxyz]/;
+	if (seq.match(patt1)) lstrf = stringsnom.indexOf(seq.charAt(3));
+	return	[lfret, lstr, lstrf];
 }
 
+function getangle(cx, cy, ex, ey) {
+  var dy = ey - cy;
+  var dx = ex - cx;
+  var theta = Math.atan2(dy, dx); 
+  return theta;
+}
 
-
-
+function arrayIsAll(array, item, comm)
+{
+	if (array == null) alert(comm);
+	for (i=0; i<array.length; i++)
+	{
+		if (array[i] != item) return false;
+	}
+	return true;
+}
 
 
 //back-canvas
@@ -475,6 +656,8 @@ function drawFullGuitar(ctx)
 	drawRect(ctx, 4, 40, 560, -18, 'black', 1, '#E6E65C'); //nut
 	drawStrings(ctx, 1.8, 535, 27, -13);
 	writeTuning(ctx, tuning, 577, -29);
+	if (capo != 0) 	drawRect(ctx, 8, 45, getFSPoint(capo, 0)[0]+3, -21, 'black', 1, '#B22400'); //capo
+
 }
 
 function drawStrings(ctx, boltRadius, length, xoff, yoff)
@@ -502,16 +685,18 @@ function drawFrets(ctx, first, last, scaleLength, fretWidth, fretLength, markerD
 	ctx.textAlign = 'center';
 	for (i = first; i <=last; i++) {
 		var d = fretLocation(scaleLength, i);
-		drawRect(ctx, fretWidth, fretLength, xoff+d, yoff, 'black', 0.5, '#939322')
+		var col = (i == capo) ? '#E6E65C' : '#939322';
+		drawRect(ctx, fretWidth, fretLength, xoff+d, yoff, 'black', 0.5, col)
+		j = i-capo;
+		var mid = (fretLocation(scaleLength, i) + fretLocation(scaleLength, i-1)) / 2 + 1;
 		if ((i > 2) && (i % 2 == 1 || i == 12) && (i != 11) && (i != 13)) {
-			var mid = (fretLocation(scaleLength, i) + fretLocation(scaleLength, i-1)) / 2 + 1;
 			if (i == 12)
 			{
 				drawCircle(ctx, markerRadius+2, xoff+mid, yoff-markerDist, '#BBBBBB', 0.5, '#2b3e50');				
 			}
 			drawCircle(ctx, markerRadius, xoff+mid, yoff-markerDist, '#BBBBBB', 0.5, '#2b3e50');
 			ctx.fillStyle = '#DDDDDD';
-			ctx.fillText(i, xoff+mid, yoff-(markerDist*0.80));
+			if (j>0) ctx.fillText(j, xoff+mid, yoff-(markerDist*0.80));			
 		}
 	}
 }
@@ -585,4 +770,19 @@ function makeArray(d1, d2) {
         arr.push(new Array(d1));
     }
     return arr;
+}
+
+function getNextAfter(index, array)
+{
+	for (i=index+1; i<array.length; i++){
+		if (array[i] != null) return i;
+	}
+	return array.length;
+}
+function getPrevBefore(index, array)
+{
+	for (i=index-1; i>-1; i--){
+		if (array[i] != null) return i;
+	}
+	return -1;
 }

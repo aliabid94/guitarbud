@@ -1,0 +1,84 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="css/style.css">
+		<title>GuitarBud - Photograph</title>
+	</head>
+	<body>
+		<a href="#"><div id="title-bar">
+			<strong>Stairway To Heaven</strong> <small> &bull; Led Zeppelin</small>
+		</div></a>
+		<div id="guitar-canvas">
+			<canvas id="back-canvas"></canvas></canvas>
+			<canvas id="front-canvas"></canvas></canvas>
+		</div>
+		<div id="playback-control">
+			<div id="left-control">
+				<a href="#" class="slower"><div class="control-btn">slower</div></a><a href="#"><div class="control-btn speed-marker">100%</div></a><a href="#" class="faster"><div class="control-btn">faster</div></a>
+			</div>
+			<div id="right-control">
+				<a href="#" id="loop"><div class="control-btn">loop</div></a><a href="#"><div class="control-btn">zoom</div></a>
+			</div>
+			<div id="mid-control">
+				<a href="#" class="pause"><div class="control-btn pause-set"><strong>pause</strong></div></a>
+				<a href="#" class="-step"><div class="control-btn play-set" id="prev-step">-step</div></a><a href="#" class="play"><div class="control-btn play-set"><strong>play</strong></div></a><a href="#" class="+step"><div class="control-btn play-set" id="next-step">+step</div></a>
+			</div>
+		</div>
+		<div id="info">
+		</div>
+	</body>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/script.js"></script>
+	<audio preload="auto" id="E2"> <source src="audio102/E2.mp3"> </audio>
+	<audio preload="auto" id="F2"> <source src="audio102/F2.mp3"> </audio>
+	<audio preload="auto" id="Fs2"> <source src="audio102/Fs2.mp3"> </audio>
+	<audio preload="auto" id="G2"> <source src="audio102/G2.mp3"> </audio>
+	<audio preload="auto" id="Gs2"> <source src="audio102/Gs2.mp3"> </audio>
+	<audio preload="auto" id="A2"> <source src="audio102/A2.mp3"> </audio>
+	<audio preload="auto" id="As2"> <source src="audio102/As2.mp3"> </audio>
+	<audio preload="auto" id="B2"> <source src="audio102/B2.mp3"> </audio>
+	<audio preload="auto" id="C3"> <source src="audio102/C3.mp3"> </audio>
+	<audio preload="auto" id="Cs3"> <source src="audio102/Cs3.mp3"> </audio>
+	<audio preload="auto" id="D3"> <source src="audio102/D3.mp3"> </audio>
+	<audio preload="auto" id="Ds3"> <source src="audio102/Ds3.mp3"> </audio>
+	<audio preload="auto" id="E3"> <source src="audio102/E3.mp3"> </audio>
+	<audio preload="auto" id="F3"> <source src="audio102/F3.mp3"> </audio>
+	<audio preload="auto" id="Fs3"> <source src="audio102/Fs3.mp3"> </audio>
+	<audio preload="auto" id="G3"> <source src="audio102/G3.mp3"> </audio>
+	<audio preload="auto" id="Gs3"> <source src="audio102/Gs3.mp3"> </audio>
+	<audio preload="auto" id="A3"> <source src="audio102/A3.mp3"> </audio>
+	<audio preload="auto" id="As3"> <source src="audio102/As3.mp3"> </audio>
+	<audio preload="auto" id="B3"> <source src="audio102/B3.mp3"> </audio>
+	<audio preload="auto" id="C4"> <source src="audio102/C4.mp3"> </audio>
+	<audio preload="auto" id="Cs4"> <source src="audio102/Cs4.mp3"> </audio>
+	<audio preload="auto" id="D4"> <source src="audio102/D4.mp3"> </audio>
+	<audio preload="auto" id="Ds4"> <source src="audio102/Ds4.mp3"> </audio>
+	<audio preload="auto" id="E4"> <source src="audio102/E4.mp3"> </audio>
+	<audio preload="auto" id="F4"> <source src="audio102/F4.mp3"> </audio>
+	<audio preload="auto" id="Fs4"> <source src="audio102/Fs4.mp3"> </audio>
+	<audio preload="auto" id="G4"> <source src="audio102/G4.mp3"> </audio>
+	<audio preload="auto" id="Gs4"> <source src="audio102/Gs4.mp3"> </audio>
+	<audio preload="auto" id="A4"> <source src="audio102/A4.mp3"> </audio>
+	<audio preload="auto" id="As4"> <source src="audio102/As4.mp3"> </audio>
+	<audio preload="auto" id="B4"> <source src="audio102/B4.mp3"> </audio>
+	<audio preload="auto" id="C5"> <source src="audio102/C5.mp3"> </audio>
+	<audio preload="auto" id="Cs5"> <source src="audio102/Cs5.mp3"> </audio>
+	<audio preload="auto" id="D5"> <source src="audio102/D5.mp3"> </audio>
+	<audio preload="auto" id="Ds5"> <source src="audio102/Ds5.mp3"> </audio>
+	<script>
+		drawGuitarPic(0);
+		playTab2(6,
+"1*----5x|z--------------------2x|z----1y------------*-1y------*------5x|z--------------------2x|z----1y------------*-1y------*-----2w----2x------1y------*--1y--------------2v------1y------2x------1y------*--1y--------------2x------1y----------5x|z--------------------2x|z----1y------------*-1y------*------5x|z--------------------2x|z----1y------------*-1y-----#"+
+"2*------------6w--------------3y------2x------------2v----------8v---*-------6w--------------3y------2x------------2v--------*-2v--------2z------2x------*------2x----2w----3u------2w------2z------2x------*------2x----2w----2z------2x------------------6w--------------3y------2x------------2v----------8v---*-------6w--------------3y------2x------------2v-------#"+
+"2*----------------------------------------------------2x------*---7v-------------------------------------------------2x----------3v-------------------------------2v-------------------------------------------------2v----------------------------------------------------------------------------2x------*---7v-------------------------------------------------2x-----#"+
+"3*----7w------7z------*-------4w------3w------------*----------------7w------7z------*-------4w------3w------------*---------*-----------3y------3w------*----------3v------3z------3v------3y------3w------*----------3v------3y------3x----------7w------7z------*-------4w------3w------------*----------------7w------7z------*-------4w------3w------------*--------#"+
+"4*--------------------8z------*------------------------------------------------------8z------*---------------------------------------------------------------------------------------------------------------------------------------------------------------------8z------*------------------------------------------------------8z------*------------------------------#"+
+"T*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#"+
+"S*----wz--y-z-wz--x-z-wz--x-z-wz--x-z-wz--x-y-z-y-x-vxy-vxy---v-v-v--wz--y-z-wz--x-z-wz--x-z-wz--x-z-wz--x-y-z-y-x-vxy-vxy---v-v-v-w-x-z-wz--x-y-wz--x-y-vy-y---x-v---w-x-y-uz--x-z-v-w-x-y-wz--x-z-wz--x-z-vy-y---x-v---w-x-y-w-x-y-z-wxyz--------wz--y-z-wz--x-z-wz--x-z-wz--x-z-wz--x-y-z-y-x-vxy-vxy---v-v-v--wz--y-z-wz--x-z-wz--x-z-wz--x-z-wz--x-y-z-y-x-vxy-vxy--#"+
+"S*------x-------y-------y-------y-------y-------------vxy--------------x-------y-------y-------y-------y-------------vxy-------------------y-------y----------------vy--------y---------------y-------y----------------v-----------------wxyz--------x-------y-------y-------y-------y-------------vxy--------------x-------y-------y-------y-------y-------------vxy----#"+
+"S*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------wxyz--------------------------------------------------------------------------------------------------------------------------#"+
+"l----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------There's a --sure/all that --gold/and she's -------to heaven----/When she --knows/if the ---closed/with a --------she came for-#"+
+"l--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------lady who's -----glitters is ----buying a stairway -------------gets there she -stores are all -word she can get what -"
+);
+
+	</script>
+</html>
