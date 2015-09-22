@@ -20,6 +20,7 @@ var lastfinger = ["*","*","*","*","*"];
 var delaypluck = [0,0,0,0,0,0];
 var subs = []
 var alllastfinger;
+var allfingersubs;
 var progress = 0;
 var lastpoint=0;
 var mx = 0;
@@ -37,6 +38,9 @@ var fingerrels = [[-6,6],[-20,3],[-32,6],[-40,21],[3,-16]];
 var fxys;
 var fingernames = "1234T"
 var capo;
+var patt_bar = /[0-9]+[uvwxyz][|][uvwxyz]/;
+var patt_bend = /[0-9]+[uvwxyz][^]/;
+var patt_hammer = /[0-9]+[uvwxyz]H/;
 
 $(window).resize(function(){
 	drawGuitarPic(capo);
@@ -144,7 +148,7 @@ function drawGuitarPic(capoloc)
 	var guitarLength = 580;
 	scale = bcanvas.width / guitarLength;
 	bcontext.clearRect(0, 0, bcanvas.width, bcanvas.height);
-	yoff = bcanvas.height/2/scale - 30;
+	yoff = bcanvas.height/2/scale - 36;
 	bcontext.scale(scale, scale);
 	bcontext.translate(xoff, yoff);
 	fcontext.scale(scale, scale);
@@ -278,8 +282,7 @@ function createAllLocs()
 	var tlen = tab[0].length;
 	alllastkey = makeArray(6, tlen);
 	alllastfinger = makeArray(5, tlen);
-
-
+	allfingersubs = makeArray(5, tlen+1);
 	var ilastkey = [capo,capo,capo,capo,capo,capo];
 	var ilastfinger = ["*","*","*","*","*"];
 	for (playLoc = 0; playLoc <= tlen; playLoc++)
@@ -289,6 +292,22 @@ function createAllLocs()
 			var letter = tab[i][playLoc];
 			if (letter != null)
 			{
+				if (letter.match(patt_bar))
+				{
+					allfingersubs[playLoc][i] = "bar";
+				}
+				else if (letter.match(patt_hammer))
+				{
+					allfingersubs[playLoc][i] = "hammer";
+				}
+				else if (letter.match(patt_bend))
+				{
+					allfingersubs[playLoc][i] = "bend";
+				}
+				if (playLoc < tlen-1 && !letter.match(patt_bar) && allfingersubs[playLoc][i] != null)
+				{ 
+					allfingersubs[playLoc+1][i] = allfingersubs[playLoc][i] + "*";
+				}
 				lf = ilastfinger[i];
 				if (lf != "*")
 				{
@@ -326,6 +345,13 @@ function createAllLocs()
 					{
 						if (ilastkey[si] < f) ilastkey[si] = f;
 					}
+				}
+			}
+			else
+			{
+				if (playLoc != 0 && allfingersubs[playLoc-1][i] == "bar")
+				{ 
+					allfingersubs[playLoc][i] = 'bar';
 				}
 			}
 		}
@@ -371,20 +397,22 @@ function drawPlay2(time, progress, playLoc)
 			fcontext.globalAlpha = 1;
 		}
 	}
-	drawHand(lastfinger, alllastfinger[playLoc + 1], progress % 1000, '#E0C266');
+	drawHand(lastfinger, alllastfinger[playLoc + 1], progress % 1000, '#E0C266', allfingersubs[playLoc], allfingersubs[playLoc+1]);
+	drawHandSubs(fcontext);
 	drawPlayProgress(fcontext, playLoc);
 }
 
 var ihand = false;
-function drawHand(fingerpos, fingerpos2, ms, color)
+function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2)
 {
 	ihand = false;
 	var ind;
-	for (i=0; playLoc >= i && arrayIsAll(fingerpos,"*",playLoc+" ;;"); i++) 
+	for (i=0; playLoc >= i && arrayIsAll(fingerpos,"*"); i++) 
 	{
 		ihand = true;
 		ind = i;
-		fingerpos=alllastfinger[playLoc-i];
+		fingerpos=alllastfinger[playLoc-i].slice();
+
 	}
 	if (ind == playLoc)
 	{
@@ -399,11 +427,11 @@ function drawHand(fingerpos, fingerpos2, ms, color)
 	var stime = 300;
 	var ctime = 1000 - stime;
 	var alp = [0,0,0,0,0];
+	var ms2 = ms - ctime;
+	var f2f = ms2 / stime;
+	var f1f = 1 - f2f;
 	if (ms > ctime)
 	{
-		var ms2 = ms - ctime;
-		var f2f = ms2 / stime;
-		var f1f = 1 - f2f;
 		var fxys3 = [0,0,0,0,0]
 		for (var i=0; i<5; i++)
 		{
@@ -415,29 +443,49 @@ function drawHand(fingerpos, fingerpos2, ms, color)
 	for (var i=4; i>=0; i--)
 	{
 		if (alp[i] == 0) alp[i] = (fingerpos[i] == "*") ? 0.35 : 1;
-		if (ihand) alp[i] = 0.35;
+		if (ihand) 
+		{
+				fxys[i][0] += 3;
+				alp[i] = 0.35;
+		}
 	}
 	var baseloc = 0;
-	var fingdist = 10;
+	var fingdist = 12;
 	for (var i=3; i>=0; i--) { baseloc += fxys[i][0]; }
 	baseloc /= 4;
-	var fw = 3.5;
 	baseloc += fingdist;
+	var tobar = false;
+	for (var i=3; i>=0; i--) {
+		if (subs[i] == "bar")
+		{
+			baseloc = fxys[i][0] + (i-1.5) * fingdist + 1;
+			tobar = true;
+		}
+		if (subs[i] == "bend")
+		{
+			if (ms < ctime / 2) {fxys[i][1] -= ms/ctime * 6;}
+			else if (ms < ctime) {fxys[i][1] -= (ctime-ms)/ctime * 6;}
+
+		}	
+	}
+	var fw = 4;
 	for (var i=4; i>=0; i--)
 	{
 		fcontext.beginPath();
-		var curx = baseloc+15-fingdist*i;
+		var curx = baseloc-fingdist*(i-1.5);
 		var cury = 30;
-		fw=3;
+		fw=3.5;
 		if (i == 4)
 		{
- 			curx = fxys[i][0];
-			cury = -19;
-			fw=4;
+ 			curx = fxys[i][0] - 2;
+			cury = -21;
+			fw=4.5;
 		}
 		var finx = fxys[i][0];
 		var finy = fxys[i][1];
+		if (finy > cury && i != 4) finy = cury - 2;
 		var knuckoff = ((finx > curx && i < 2) || (finx < curx && i >= 2)) ? 0.8 : 0.2;
+		if (i == 4) knuckoff = 0.8;
 		var midx = curx*.5 + finx*0.5;
 		var midy = cury*knuckoff + finy*(1-knuckoff);
 		var angle = getangle(curx, cury, midx, midy);
@@ -470,6 +518,27 @@ function drawHand(fingerpos, fingerpos2, ms, color)
 	    fcontext.fill();
 		fcontext.globalAlpha = 1;
 	}
+}
+
+function drawHandSubs(ctx){
+	ctx.font =  "bold 8px Josefin Sans";
+	ctx.textAlign = 'center';
+	ctx.globalAlpha = 0.8;
+	for (i=0; i<4; i++)
+	{
+		if (allfingersubs[playLoc][i] != null) 
+		{
+			var nowtext = allfingersubs[playLoc][i];
+			if (nowtext.charAt(nowtext.length - 1) == "*") nowtext = nowtext.substring(0,nowtext.length - 1);
+      		var metrics = ctx.measureText(nowtext);
+      		var width = metrics.width;
+      		drawRect(ctx, width+4, 9, fxys[i][0]-width/2-2, fxys[i][1]-13.5, 'black', 0.5, 'white')
+			ctx.fillStyle = "black";
+			ctx.fillText(nowtext,fxys[i][0],fxys[i][1]-6);	
+		}
+	}
+	ctx.globalAlpha = 1;
+	ctx.textAlign = 'left';
 }
 
 function getFingerXY(fingerpos){
@@ -524,28 +593,6 @@ function getFingerXY(fingerpos){
 	return fixedfing;
 }
 
-function drawFinger2(ctx, color, finger, radius, fingerlen, xoff, yoff, angle, alpha) {
-	ctx.save();
-	ctx.beginPath();
-	ctx.globalAlpha = alpha;
-	ctx.translate(xoff, yoff);
-	ctx.rotate(angle);
-	ctx.moveTo(-radius, fingerlen);
-	ctx.lineTo(-radius, 0);
-	ctx.arcTo(0, -100, radius, 0, radius);
-	ctx.lineTo(radius, fingerlen);
-    ctx.fillStyle = color;
-    ctx.fill();
-	ctx.lineWidth = 1;
-	ctx.strokeStyle = 'black';
-    ctx.stroke();
-	ctx.globalAlpha = 1;
-    ctx.restore();
-	ctx.font =  "bold 8px Courier";
-	ctx.fillStyle = 'black';
-//	ctx.fillText(finger, xoff-2, yoff+3);
-}
-
 
 function drawPlayProgress(ctx, playLoc) {
 	drawRect(ctx, 400, 12, 100, 45, 'black', 1, '#BFC5CA');
@@ -568,7 +615,7 @@ function drawPlayProgress(ctx, playLoc) {
 		ctx.globalAlpha = 0.5;
 		drawRect(ctx, 8, 16, smx-4, 43, '#black', 1, '#80E6FF');
 		newunits = Math.floor((smx - 100) / unitdist);
-		drawHand(alllastfinger[newunits], alllastfinger[newunits], 0, '#80E6FF')
+		drawHand(alllastfinger[newunits], alllastfinger[newunits], 0, '#80E6FF',allfingersubs[newunits],["","","","",""])
 		ctx.globalAlpha = 1;	
 		if (mouseclick)
 		{
@@ -606,8 +653,7 @@ function getfns(seq)
 	lfret = parseInt(seq.charAt(0)) + capo;
 	lstrs = seq.charAt(1);
 	var lstrf = lstr = stringsnom.indexOf(lstrs);
-	var patt1 = /[0-9]+[uvwxyz][|][uvwxyz]/;
-	if (seq.match(patt1)) lstrf = stringsnom.indexOf(seq.charAt(3));
+	if (seq.match(patt_bar)) lstrf = stringsnom.indexOf(seq.charAt(3));
 	return	[lfret, lstr, lstrf];
 }
 
@@ -618,9 +664,8 @@ function getangle(cx, cy, ex, ey) {
   return theta;
 }
 
-function arrayIsAll(array, item, comm)
+function arrayIsAll(array, item)
 {
-	if (array == null) alert(comm);
 	for (i=0; i<array.length; i++)
 	{
 		if (array[i] != item) return false;
