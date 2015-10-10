@@ -1,8 +1,11 @@
-@import url("http://fonts.googleapis.com/css?family=Josefin+Sans");
 
 html, body {
 	margin:0;
 	padding:0;
+}
+
+body{
+	background-color: #bbbbbb;
 }
 
 a {
@@ -10,8 +13,46 @@ a {
 	 color: #dddddd;
 }
 
+#song-list{
+	font-family: Verdana;
+	width: 100%;
+	font-size: 2.5vh;
+	border-collapse: collapse;
+}
 
-#title-bar, #playback-control {
+#song-list tr:hover{
+	background-color: #dddddd;
+	font-weight: bold;
+}
+
+
+#song-list td{
+	padding: 7px;
+	margin: 3px;
+}
+
+#song-list tr:nth-child(1) td:nth-child(1){
+	width: 50%;
+}
+#song-list tr:nth-child(1) td:nth-child(2){
+	width: 35%;
+}
+#song-list tr:nth-child(1) td:nth-child(3){
+	width: 14%;
+}
+#song-list td a, .home-button{
+	text-decoration: none;
+	color: black;
+	display: block;
+}
+
+
+
+
+#bud {
+	color: #D68533;		
+}
+#gb-bar, #title-bar, #playback-control {
 	font-family: 'Josefin Sans';
 	color: #dddddd;	
 	position: relative;
@@ -21,13 +62,68 @@ a {
 #title-bar {
 	background-color: #2b3e50;
 	width: 100%;
-	height:10%;
 	text-align: center;
 	font-size: 6vh;
 	height:8%;
 }
 
-#title-bar:hover {
+#gb-bar {
+	background-color: #2b3e50;
+	width: 100%;
+	text-align: center;
+	font-size: 10vh;
+	height:12%;
+}
+
+#song-combobox{
+	text-align: center;	
+	padding: 2vw;
+	background-color: #4e5d6c;
+}
+
+#song-input{
+	text-align: center;	
+	font-family: 'Josefin Sans';
+	color: white;
+	font-size: 5vh;
+	width: 60vw;
+	background-color: #838E98;
+	border: 2px solid black;
+	margin: 1vw;
+	padding: 0.5vw;
+}
+#query-text{
+	width: 602ww;
+	background-color: red;	
+	text-align: left;	
+}
+#song-input:focus{
+	outline: none;
+}
+#button-row{
+}
+.home-button{
+	background-color: #D68533;			
+	font-size: 3vh;
+	padding: 0.5vw;
+	margin: 0.5vw;
+	font-family: 'Josefin Sans';
+	display: inline-block;
+	text-align: center;	
+	font-weight: bold;
+	border: 2px solid black;
+}
+.home-button:hover{
+	background-color: #EBA054;			
+}
+#hb1{
+	width: 43vw;
+}
+#hb2{
+	width: 14vw;
+}
+
+#title-bar:hover, #gb-bar:hover  {
 	color: #eeeeee;	
 	text-shadow: 0 0 3px white;
 }
@@ -36,6 +132,7 @@ a {
 	height:55%;
 	width:100%;
 	position: relative;
+	background-color: #4e5d6c;
 }
 
 #back-canvas, #front-canvas {
@@ -86,9 +183,5 @@ a {
 }
 
 #info {
-}
-
-
-body {
-	background-color: #4e5d6c;
+	margin: 1%;
 }
