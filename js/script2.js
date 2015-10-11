@@ -55,13 +55,13 @@ $(window).resize(function(){
 
 $("#left-control a").click(function () {
 
-	if ($(this).hasClass("faster") && spf < 200)
+	if ($(this).hasClass("faster") && spf < 100)
 	{
-		spf += 20;
+		spf += 10;
 	} 
-	else if ($(this).hasClass("slower") && spf > 20)
+	else if ($(this).hasClass("slower") && spf > 10)
 	{
-		spf -= 20;
+		spf -= 10;
 	} 
 	else if ($(this).find("div").hasClass("speed-marker"))
 	{
@@ -408,12 +408,13 @@ function createAllLocs()
 					f2 = fs[2];
 					s2 = fs[3];
 					allfingersubs[playLoc][i] = "slide: "+(f-capo)+" ~ "+(f2-capo);
-					slides[playLoc][i] = [fs, 0];
-					var newletter = f2 + stringsnom.charAt(s);
+					var oldletter = (f-capo) + stringsnom.charAt(s);
+					var newletter = (f2-capo) + stringsnom.charAt(s);
 					tab[i][playLoc+2] = newletter;
 					softplucks[playLoc+2][s] = true;
-					if (playLoc < tlen-2) slides[playLoc][i+1] = [fs, 0.5];
-					if (playLoc < tlen-3) slides[playLoc][i+2] = [fs, 1];
+					slides[playLoc][i] = [oldletter, newletter, 0];
+					if (playLoc < tlen-2) slides[playLoc+1][i] = [oldletter, newletter, 0.5];
+					if (playLoc < tlen-3) slides[playLoc+2][i] = [oldletter, newletter, 1];
 				}
 				for (k=1; k<3; k++)
 				{
@@ -583,27 +584,36 @@ function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2, slide1, slide2)
 	var f2f = ms2 / stime;
 	var f1f = 1 - f2f;
 
-
 	var fxys3 = [0,0,0,0,0]
+	var touched = [false, false, false, false, false];
 	for (var i=0; i<5; i++)
 	{
 		if (slide1[i] != null && slide2[i] != null)
 		{
 			s1pos = fingerpos.slice();
 			s2pos = fingerpos.slice();
-			letter = slide1[i][0];
-			fs = getfns(letter)
-			f = fs[0];
-			s = fs[1];
-			f2 = fs[2];
-			s2 = fs[3];
-			s1pos[i] = f + s;
-			s2pos[i] = f2 + s;
+			letter1 = slide1[i][0];
+			letter2 = slide1[i][1];
+			weight1 = 1000 * slide1[i][2];
+			weight2 = 1000 * slide2[i][2];
+			weightdiff = weight2 - weight1;
+			t2 = ms * weightdiff / 1000 + weight1;
+			s1pos[i] = letter1
+			s2pos[i] = letter2
 			s1fxys = getFingerXY(s1pos);
 			s2fxys = getFingerXY(s2pos);
-			fxys3[i] = [s1fxys[i][0] * (ms/1000) + s2fxys[i][0] * ((1000-ms)/ms), s1fxys[i][1]];
-			fxys[i] = fxys3[i];
-			alert("slide");
+			fxys3[i] = [s1fxys[i][0] * ((1000-t2)/1000) + s2fxys[i][0] * (t2/1000) , s1fxys[i][1]];
+			fnt = getFingerXY(s1pos, fxys3, i);
+			fxys3 = fnt[0];
+			var ntouched = fnt[1];
+			console.log(ntouched);
+			for (var k=0; k<4; k++)
+			{
+				if (k==i || ntouched[k]) {
+					fxys[i] = fxys3[i];
+					touched[k] = ntouched[k];
+				}
+			}
 		}
 		else if (ms > ctime)
 		{
@@ -611,6 +621,10 @@ function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2, slide1, slide2)
 			alp[i] = (f1f * ((fingerpos[i] == "*") ? 0.35 : 1) + f2f * ((fingerpos2[i] == "*") ? 0.35 : 1));
 			fxys[i] = fxys3[i]
 		}
+	}
+	for (var i=4; i>=0; i--)
+	{
+		if (touched[i]) fxys[i] = touched[i];
 	}
 
 	for (var i=4; i>=0; i--)
@@ -720,14 +734,15 @@ function drawSub(ctx, text, xoff, yoff)
 	ctx.globalAlpha = 1;
 }
 
-function getFingerXY(fingerpos){
-	var fixedfing = [0,0,0,0,0];
+function getFingerXY(fingerpos, preset, ctrlpoint){
+	var touched = [false, false, false, false, false];
+	var fixedfing = (preset == null) ? [0,0,0,0,0] : preset;
 	var corrdist = [10,10,10,10,10]
 	var pushover = [1,1,1,1,1]
 	var anchors = 0;
 	for (var i=4; i>-1; i--)
 	{
-		if (fingerpos[i] != "*")
+		if (fingerpos[i] != "*" && fixedfing[i] == 0)
 		{
 			anchors += 1;
 			fs = getfns(fingerpos[i]);
@@ -753,23 +768,29 @@ function getFingerXY(fingerpos){
 			if (fingerpos[i] == "*") fixedfing[i] = [0,0];
 			for (var k=0; k<5; k++)
 			{
-				if (fingerpos[k] != "*" && Math.abs(k - i) < corrdist[i])
+				if (fingerpos[k] != "*")
 				{
-					fixedfing[i][0] = fixedfing[k][0] + fingerrels[i][0] - fingerrels[k][0];
-					fixedfing[i][1] = fixedfing[k][1] + fingerrels[i][1] - fingerrels[k][1];
-					corrdist[i] = Math.abs(k - i);
-				}
-				else if (fingerpos[k] != "*" && Math.abs(k - i) == corrdist[i])
-				{
-					fixedfing[i][0] += (fixedfing[k][0] + fingerrels[i][0] - fingerrels[k][0]);
-					fixedfing[i][1] += (fixedfing[k][1] + fingerrels[i][1] - fingerrels[k][1]);
-					fixedfing[i][0] /= 2;
-					fixedfing[i][1] /= 2;
+					if (Math.abs(k - i) < corrdist[i])
+					{
+						fixedfing[i][0] = fixedfing[k][0] + fingerrels[i][0] - fingerrels[k][0];
+						fixedfing[i][1] = fixedfing[k][1] + fingerrels[i][1] - fingerrels[k][1];
+						corrdist[i] = Math.abs(k - i);
+						if (k == ctrlpoint) touched[i] = fixedfing[i];
+					}
+					else if (Math.abs(k - i) == corrdist[i])
+					{
+						fixedfing[i][0] += (fixedfing[k][0] + fingerrels[i][0] - fingerrels[k][0]);
+						fixedfing[i][1] += (fixedfing[k][1] + fingerrels[i][1] - fingerrels[k][1]);
+						fixedfing[i][0] /= 2;
+						fixedfing[i][1] /= 2;
+						if (k == ctrlpoint) touched[i] = fixedfing[i];
+					}
 				}
 			}
 		}
 	}	
-	return fixedfing;
+	if (!ctrlpoint) return fixedfing;
+	return [fixedfing, touched];
 }
 
 
@@ -857,7 +878,6 @@ function getfns(seq)
 	if (allpseq.indexOf(seq) < 0)
 	{
 		allpseq = allpseq + seq;
-//		console.log(seq + ": " + retmat[0] + " | "+ retmat[1] + " | " + retmat[2] + " | " + retmat[3])	
 	} 
 	return [parseInt(retmat[0])+capo, stringsnom.indexOf(retmat[1]), parseInt(retmat[2])+capo, stringsnom.indexOf(retmat[3])];
 }
@@ -899,4 +919,10 @@ function getPrevBefore(index, array)
 		if (array[i] != null) return i;
 	}
 	return -1;
+}
+
+function approximatelyEqual(a, b, epsilon) {
+	if (epsilon == null) epsilon = 0.05;
+    var A = Math.abs(a), B = Math.abs(b);
+    return Math.abs(A - B) <= (A < B ? B : A) * epsilon;
 }
