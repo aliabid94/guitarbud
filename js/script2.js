@@ -33,7 +33,7 @@ var mouseclick = false;
 var looping=false;
 var acoustic;
 var notes = ["C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"];
-var tuning = [["Ds", 4],["As",3],["Fs",3],["Cs",3],["Gs",2],["Ds",2]];
+var tuning = [["E", 4],["B",3],["G",3],["D",3],["A",2],["E",2]];
 var stringsnom = "zyxwvu";
 var fingerrels = [[-6,6],[-20,3],[-32,6],[-40,21],[3,-16]];
 var fxys;
@@ -312,8 +312,8 @@ function play2(timestamp)
 				pluck(fromval, curpoint, 0, false);
 				for (i=fromval+move; i!=toval+move; i+=move)
 				{
-					strumtime += 40;
-					pluck(fromval, curpoint, strumtime, false);
+					strumtime += 30;
+					pluck(i, curpoint, strumtime, false);
 				}
 			}
 			else if (patt3.test(pluckvals)){
@@ -655,9 +655,45 @@ function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2, slide1, slide2)
 
 		}	
 	}
-	var fw = 4;
+	var orderfired = [];
+	var invis = [];
+	var vis = [];
 	for (var i=4; i>=0; i--)
 	{
+		if (fingerpos[i] == "*")
+		{
+			invis.push(i);
+		}
+		else
+		{
+			if (vis.length == 0)
+			{
+				vis.push(i);
+			}
+			else
+			{
+				for (var j=0; j<vis.length;j++)
+				{
+					if (fxys[i][1] > fxys[vis[j]][1])
+					{
+						vis.splice(j, 0, i);
+						break;
+					}
+					else if (j == vis.length-1)
+					{
+						vis.splice(j+1, 0, i);	
+						break;				
+					}
+				}
+			}
+		}
+	}
+	orderfired = invis.concat(vis);
+
+	var fw = 4;
+	for (var ii=0; ii<=4; ii++)
+	{
+		i = orderfired[ii];
 		fcontext.beginPath();
 		var curx = baseloc-fingdist*(i-1.5);
 		var cury = 30;
@@ -752,10 +788,26 @@ function getFingerXY(fingerpos, preset, ctrlpoint){
 			var fsp2 = getFSPoint(f-1, s);
 			if (i != 4)
 			{
-				pfs = getfns(fingerpos[i+1]);
-				pf = pfs[0];
-				ps = pfs[1];
-				if (f == pf && s == ps + 1) pushover[i] = pushover[i]+1;
+				for (k=0; k<4; k++)
+				{
+					if (i != k)
+					{
+						pfs = getfns(fingerpos[k]);
+						pf = pfs[0];
+						ps = pfs[1];
+						if (f == pf && Math.abs(s - ps) == 1)
+						{
+							if (k > i)
+							{
+								pushover[i] = pushover[k]+1;
+							}
+							else
+							{
+								pushover[k] = pushover[i]+1;
+							}
+						}
+					}
+				}
 			}
 			fsp15 = (fsp[0]*(5-pushover[i]) + fsp2[0]*(pushover[i]))/5;
 			fixedfing[i] = [fsp15, fsp[1]];
