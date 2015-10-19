@@ -53,7 +53,7 @@ a {
 	color: #D68533;		
 }
 #gb-bar, #title-bar, #playback-control {
-	font-family: 'Josefin Sans';
+	font-family: Century Gothic, sans-serif;
 	color: #dddddd;	
 	position: relative;
 	z-index: 2;
@@ -83,8 +83,7 @@ a {
 
 #song-input{
 	text-align: center;	
-	font-family: 'Josefin Sans';
-	color: white;
+	font-family: Century Gothic, sans-serif	color: white;
 	font-size: 5vh;
 	width: 60vw;
 	background-color: #838E98;
@@ -107,7 +106,7 @@ a {
 	font-size: 3vh;
 	padding: 0.5vw;
 	margin: 0.5vw;
-	font-family: 'Josefin Sans';
+	font-family: Century Gothic, sans-serif	
 	display: inline-block;
 	text-align: center;	
 	font-weight: bold;
@@ -129,7 +128,7 @@ a {
 }
 
 #guitar-canvas {
-	height:55%;
+	height:45vh;
 	width:100%;
 	position: relative;
 	background-color: #4e5d6c;
@@ -183,5 +182,61 @@ a {
 }
 
 #info {
-	margin: 1%;
+	font-family: Verdana;
+	margin: 5px;
+}
+
+
+#info2, #info-back, #info-forward
+{
+	height: 35%;
+	padding: 1%;	
+	background-color: #DDDDDD;
+}
+
+#info-back, #info-forward
+{
+	width: 5%;
+}
+
+#info2 {
+	width: 97%;
+	overflow-x: auto;
+	overflow-y: visible;	
+	position: relative;
+	margin: 0 auto;
+}
+
+#info2 a {
+	color: black;
+}
+
+
+
+.ins {
+	padding: 3px;
+	margin: 0px;
+	display: inline-block;
+	font-family:"Consolas", monospace;
+	font-size: 4vh;
+	text-align: center;
+}
+#ins-table {
+	height: 100%;
+	border-collapse: collapse;
+}
+#ins-tr {
+	height: 100%;
+	vertical-align: middle;
+}
+#ins-tr td{
+	vertical-align: middle;
+}
+
+.ins-select {
+	background-color: #E6B685;
+}
+
+.ins-a-hover {
+	background-color: #B2D1FF;	
 }
