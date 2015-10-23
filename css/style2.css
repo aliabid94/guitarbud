@@ -15,7 +15,7 @@ a {
 #extra-links a {
 	 color: black;
 }
-#about-link {
+#about {
 	 color: #dddddd;
 }
 
@@ -133,7 +133,7 @@ a {
 	text-align: center;	
 	font-weight: bold;
 	border: 2px solid black;
-	width: 65%;
+	width: 50%;
 }
 .home-button:hover{
 	background-color: #EBA054;			
@@ -266,15 +266,4 @@ a {
 }		
 .ins-a-hover {		
 	background-color: #B2D1FF;			
-}
-#about{
-	font-family: Verdana, sans-serif;
-	font-size: 18;
-	color: #CCCCCC;
-	padding: 15px;
-	line-height: 1.5;
-	background-color: #4e5d6c;
-}
-#about .big{
-	font-size: 24;	
 }

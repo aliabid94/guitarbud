@@ -1,39 +1,51 @@
+
 <html>
 	<head>
-		<link rel="stylesheet" href="css/style.css">
 		<title>GuitarBud</title>
+		
+		
+<link type="text/css" rel="stylesheet" href="css/style.css">
+
+
 	</head>
 	<body>
 		<a href="#"><div id="gb-bar">
 			<strong>Guitar<span id="bud">Bud</span></strong>
 		</div></a>
 		<div id="song-combobox">
-			<div><input type="text" id="song-input"></div>
-			<div id="button-row">
-				<a href="#"><div class="home-button" id="hb1">Find Song</div></a>
-				<a href="#"><div class="home-button" id="hb2">Random</div></a>				
+			<canvas id="shadow-canvas"></canvas>
+			<div id="song-combobox-inner">
+				<div><input type="text" id="song-input" value="" autofocus onfocus="this.value = this.value;"></div>
+				<div id="button-row">
+					<a href="javascript:;"><div class="home-button" id="hb1">Find Song</div></a>
+					<a href="javascript:;"><div class="home-button" id="hb2">Random</div></a><br>				
+					<div id="extra-links"><a href="about.html"><span id="about-link">About</span></a> | <a href="about.html#contact">Contact us</a> | <a href="about.html#terms">Terms &amp Conditions</a></div>
+				</div>
 			</div>
 		</div>
 		<div id="playback-control"></div>		
 		<div id="info">
 			<table id="song-list">
-				<tr>
-					<td><a href = "#">Stairway To Heaven</a></td>
-					<td><a href = "#">Led Zeppelin</a></td>
-					<td><a href = "#">132</a></td>
-				</tr>
-				<tr>
-					<td>Hero</td>
-					<td>Family of the Year</td>
-					<td>24</td>
-				</tr>
-				<tr>
-					<td>Photograph</td>
-					<td>Ed Sheeran</td>
-					<td>51</td>
-				</tr>
-			</table>
+
+	<tr>
+		<td><a href = "stairway.html">Led Zeppelin</a></td>
+		<td><a href = "stairway.html">Stairway To Heaven</a></td>
+		<td><a href = "stairway.html">232 pts.</a></td>
+	</tr>
+
+	<tr>
+		<td><a href = "morethanwords.html">Extreme</a></td>
+		<td><a href = "morethanwords.html">More Than Words</a></td>
+		<td><a href = "morethanwords.html">90 pts.</a></td>
+	</tr>
+
+
+</table>
+<strong></strong>
 		</div>
 	</body>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
+	
+<script src="js2/jquery.min.js"></script>
+<script src="js2/script_draw.js"></script>
+<script src="js2/script.js"></script>
 </html>

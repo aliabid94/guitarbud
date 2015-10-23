@@ -47,10 +47,6 @@ function logIns(start, end)
 	var dc = 0;	
 	var fingerstoslide = [];
 	pretable = [0,0,0,0,0,0];
-	var chordtable = new Array(end - start + 3);
-	var bartable = new Array(end - start + 3);
-	var haschords = false;
-	var hasbars = false;
 	for (i=start; i<=end; i++)
 	{
 		curiset = instructions[i];
@@ -143,14 +139,7 @@ function logIns(start, end)
 					if (type == "C")
 					{
 						outins = "Form the "+ins+" chord.";
-						leftins.unshift(outins);
-						chordtable[dc] = ins;
-						haschords = true;
-					}
-					if (type == "b")
-					{
-						bartable[dc] = true;
-						hasbars = true;
+						leftins.unshift(outins);			
 					}
 					else if (patt_pluck.test(ins))
 					{
@@ -227,44 +216,11 @@ function logIns(start, end)
 		fingerstoslide = [];
 	}
 
-	divtext = "<table id=\"ins-table\">";
-	if (haschords)
-	{
-		divtext += "<tr id=\"chord-tr\">";
-		for (dc=0; dc<chordtable.length; dc++)
-		{
-			var curchord = chordtable[dc];
-			var nextchord = chordtable[dc+1];
-			if (curchord != null)
-			{
-				divtext+="<td>"+curchord+"</td>";
-			}
-			else if (nextchord != null)
-			{
-				divtext+="<td colspan=\"3\">"+nextchord+"</td>";
-				dc+=2;
-			}
-			else
-			{
-				divtext+="<td></td>";
-			}
-		}
-		divtext += "</tr>";
-	}
-	divtext += "<tr id=\"ins-tr\">";
-
+	divtext = "<table id=\"ins-table\"> <tr id=\"ins-tr\">";
 	for (dc=0; dc<divmatrix.length; dc++)
 	{
 		divtext += "</a></div>";
-		if (bartable[dc] != null)
-		{
-			divtext += "<td class=\"bar-td\">";
-		}
-		else
-		{
-			divtext += "<td>";
-		}
-		divtext += "<a href=\"javascript:;\" class=\"ins-a\"><div class=\"ins\" id=\"ins-"+(dc+1)+"\">";
+		divtext += "<td><a href=\"javascript:;\" class=\"ins-a\"><div class=\"ins\" id=\"ins-"+(dc+1)+"\">";
 		for (var si=0; si<6; si++)
 		{
 			divtext += divmatrix[dc][si];

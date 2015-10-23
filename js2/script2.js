@@ -124,6 +124,7 @@ function loopfunc() {
 
 $(document).ready(function() {
 	$("#mid-control .pause-set").hide();
+	$("#mid-control .play-set").hide();
 	loadAll();
 	speed = 0;
 	fcanvas.addEventListener('mousemove', function(evt) {
@@ -196,7 +197,11 @@ var loadcount = 0
 var toload = 36
 function soundLoaded(event) {
 	loadcount += 1;
-
+	if (loadcount == toload)
+	{
+		$("#loading").remove();
+		pausefunc();
+	}
 }
 
 function stop() {
@@ -560,7 +565,6 @@ function drawPlay2(time, progress, playLoc)
 }
 
 var ihand = false;
-lsloc = 0;
 function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2, slide1, slide2)
 {
 	ihand = false;
@@ -611,13 +615,8 @@ function drawHand(fingerpos, fingerpos2, ms, color, subs, subs2, slide1, slide2)
 			fxys3[i] = [s1fxys[i][0] * ((1000-t2)/1000) + s2fxys[i][0] * (t2/1000) , s1fxys[i][1]];
 			fnt = getFingerXY(s1pos, fxys3, i);
 			fxys3 = fnt[0];
-			if (playLoc != lsloc) {
-				console.log(i + ": " + s1fxys[i][1]);
-				console.log(i + ": " + s2fxys[i][1]);
-				console.log(i + ": " + fxys3[i]);
-				lsloc = playLoc;
-			}
 			var ntouched = fnt[1];
+			console.log(ntouched);
 			for (var k=0; k<4; k++)
 			{
 				if (k==i || ntouched[k]) {
